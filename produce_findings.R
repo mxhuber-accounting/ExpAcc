@@ -121,20 +121,25 @@ invisible(lapply(pkgs, attach_pkg))
 
 if (pull_wrds_data) source("code/pull_wrds_data.R", local = new.env())
 
-# Run the code below to update API access that has changed since 2018
+# Fallback for dead APIs (Quandl requires API key since ~2023, RCurl has
+# binary compatibility issues on modern R). Downloads the same data from
+# alternative sources when cached files don't yet exist.
+if (!file.exists("data/cpiauscl.RDS")) {
+  cpiauscl <- read.csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL",
+                       stringsAsFactors = FALSE)
+  names(cpiauscl) <- c("Date", "Value")
+  cpiauscl$Date <- as.Date(cpiauscl$Date)
+  saveRDS(cpiauscl, "data/cpiauscl.RDS")
+}
 
-library(tidyverse)
-cpiauscl <- read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL")
-names(cpiauscl) <- c("Date", "Value")
-saveRDS(cpiauscl, "data/cpiauscl.RDS")
-refresh <- FALSE
-
-df <- read.csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-3/slim-3.csv", stringsAsFactors = FALSE)
-iso3_names <- df[,c(2,1)]
-names(iso3_names) <- c("loc", "country_name")
-iso3_names$country_name[iso3_names$loc == "GBR"] <- "United Kingdom"
-saveRDS(iso3_names, "data/iso3_country_names.RDS")
-refresh <- FALSE
+if (!file.exists("data/iso3_country_names.RDS")) {
+  df <- read.csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-3/slim-3.csv",
+                 stringsAsFactors = FALSE)
+  iso3_names <- df[, c(2, 1)]
+  names(iso3_names) <- c("loc", "country_name")
+  iso3_names$country_name[iso3_names$loc == "GBR"] <- "United Kingdom"
+  saveRDS(iso3_names, "data/iso3_country_names.RDS")
+}
 
 
 list2env(prepare_us_samples(), environment())
