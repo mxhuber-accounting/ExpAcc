@@ -121,6 +121,22 @@ invisible(lapply(pkgs, attach_pkg))
 
 if (pull_wrds_data) source("code/pull_wrds_data.R", local = new.env())
 
+# Run the code below to update API access that has changed since 2018
+
+library(tidyverse)
+cpiauscl <- read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL")
+names(cpiauscl) <- c("Date", "Value")
+saveRDS(cpiauscl, "data/cpiauscl.RDS")
+refresh <- FALSE
+
+df <- read.csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/slim-3/slim-3.csv", stringsAsFactors = FALSE)
+iso3_names <- df[,c(2,1)]
+names(iso3_names) <- c("loc", "country_name")
+iso3_names$country_name[iso3_names$loc == "GBR"] <- "United Kingdom"
+saveRDS(iso3_names, "data/iso3_country_names.RDS")
+refresh <- FALSE
+
+
 list2env(prepare_us_samples(), environment())
 list2env(prepare_int_samples(), environment())
 us_ys <- prepare_us_yearly_sample(test_sample)
