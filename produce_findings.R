@@ -122,7 +122,6 @@ invisible(lapply(pkgs, attach_pkg))
 if (pull_wrds_data) source("code/pull_wrds_data.R", local = new.env())
 
 # Fallback for dead APIs. Downloads the same data from alternative sources.
-library(tidyverse)
 cpiauscl <- read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL")
 names(cpiauscl) <- c("Date", "Value")
 saveRDS(cpiauscl, "data/cpiauscl.RDS")
